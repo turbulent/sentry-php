@@ -41,6 +41,11 @@ final class Transaction extends Span
     protected $profiler = null;
 
     /**
+     * @var bool Whether the transaction should be sent or not.
+     */
+    public $doNotSent = false;
+
+    /**
      * Span constructor.
      *
      * @param TransactionContext $context The context to create the transaction with
@@ -152,6 +157,10 @@ final class Transaction extends Span
         parent::finish($endTimestamp);
 
         if (true !== $this->sampled) {
+            return null;
+        }
+
+        if ($this->doNotSent) {
             return null;
         }
 

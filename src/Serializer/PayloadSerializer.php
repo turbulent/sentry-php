@@ -223,6 +223,8 @@ final class PayloadSerializer implements PayloadSerializerInterface
             ];
         }
 
+        // debug($result['contexts']['trace']);
+
         return $result;
     }
 

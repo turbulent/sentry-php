@@ -18,7 +18,16 @@ function init(array $options = []): void
 {
     $client = ClientBuilder::create($options)->getClient();
 
-    SentrySdk::init()->bindClient($client);
+    $hub = SentrySdk::init();
+    $hub->bindClient($client);
+
+    $transaction = $hub->startTransaction(new TransactionContext());
+    $transaction->doNotSent = true;
+    $hub->configureScope(function (Scope $scope) use ($transaction): void {
+        $scope->setSpan($transaction);
+    });
+
+    // debug($transaction->getTraceContext());
 }
 
 /**

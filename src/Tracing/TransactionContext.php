@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Sentry\Tracing;
 
+use Sentry\SentrySdk;
+
 final class TransactionContext extends SpanContext
 {
     private const TRACEPARENT_HEADER_REGEX = '/^[ \\t]*(?<trace_id>[0-9a-f]{32})?-?(?<span_id>[0-9a-f]{16})?-?(?<sampled>[01])?[ \\t]*$/i';
@@ -40,6 +42,12 @@ final class TransactionContext extends SpanContext
         $this->name = $name;
         $this->parentSampled = $parentSampled;
         $this->metadata = $metadata ?? new TransactionMetadata();
+
+        $transaction = SentrySdk::getCurrentHub()->getTransaction();
+        if (null !== $transaction) {
+            $this->parentSpanId = $transaction->getSpanId();
+            $this->traceId = $transaction->getTraceId();
+        }
     }
 
     /**

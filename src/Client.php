@@ -272,6 +272,13 @@ final class Client implements ClientInterface
             $event->setLogger($this->options->getLogger(false));
         }
 
+        if (empty($event->getContexts()['trace'])) {
+            $event->setContext('trace', [
+                'trace_id' => (string) SentrySdk::getCurrentHub()->getTransaction()->getTraceId(),
+                'span_id' => (string) SentrySdk::getCurrentHub()->getSpan()->getSpanId(),
+            ]);
+        }
+
         $isTransaction = EventType::transaction() === $event->getType();
         $sampleRate = $this->options->getSampleRate();
 
