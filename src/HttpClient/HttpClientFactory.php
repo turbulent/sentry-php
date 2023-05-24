@@ -4,9 +4,8 @@ declare(strict_types=1);
 
 namespace Sentry\HttpClient;
 
+use GuzzleHttp\Client as GuzzleHttpClient;
 use GuzzleHttp\RequestOptions as GuzzleHttpClientOptions;
-use Http\Adapter\Guzzle6\Client as Guzzle6HttpClient;
-use Http\Adapter\Guzzle7\Client as Guzzle7HttpClient;
 use Http\Client\Common\Plugin\AuthenticationPlugin;
 use Http\Client\Common\Plugin\DecoderPlugin;
 use Http\Client\Common\Plugin\ErrorPlugin;
@@ -22,6 +21,7 @@ use Psr\Http\Message\UriFactoryInterface;
 use Sentry\HttpClient\Authentication\SentryAuthentication;
 use Sentry\HttpClient\Plugin\GzipEncoderPlugin;
 use Sentry\Options;
+use Stayallive\Http\Adapter\Guzzle\Client;
 
 /**
  * Default implementation of the {@HttpClientFactoryInterface} interface that uses
@@ -108,7 +108,7 @@ final class HttpClientFactory implements HttpClientFactoryInterface
      */
     private function resolveClient(Options $options)
     {
-        if (class_exists(Guzzle7HttpClient::class) || class_exists(Guzzle6HttpClient::class)) {
+        if (class_exists(GuzzleHttpClient::class)) {
             $guzzleConfig = [
                 GuzzleHttpClientOptions::TIMEOUT => $options->getHttpTimeout(),
                 GuzzleHttpClientOptions::CONNECT_TIMEOUT => $options->getHttpConnectTimeout(),
@@ -118,11 +118,7 @@ final class HttpClientFactory implements HttpClientFactoryInterface
                 $guzzleConfig[GuzzleHttpClientOptions::PROXY] = $options->getHttpProxy();
             }
 
-            if (class_exists(Guzzle7HttpClient::class)) {
-                return Guzzle7HttpClient::createWithConfig($guzzleConfig);
-            }
-
-            return GuzzleHttpClient::createWithConfig($guzzleConfig);
+            return Client::createWithConfig($guzzleConfig);
         }
 
         return HttpAsyncClientDiscovery::find();

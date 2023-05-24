@@ -8,11 +8,6 @@
       <code>$parsedDsn['user']</code>
     </PossiblyUndefinedArrayOffset>
   </file>
-  <file src="src/HttpClient/HttpClientFactory.php">
-    <UndefinedClass occurrences="1">
-      <code>GuzzleHttpClient</code>
-    </UndefinedClass>
-  </file>
   <file src="src/Integration/IntegrationRegistry.php">
     <PossiblyInvalidArgument occurrences="2">
       <code>$userIntegration</code>

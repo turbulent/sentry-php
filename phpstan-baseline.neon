@@ -36,11 +36,6 @@ parameters:
 			path: src/Dsn.php
 
 		-
-			message: "#^Call to static method createWithConfig\\(\\) on an unknown class Sentry\\\\HttpClient\\\\GuzzleHttpClient\\.$#"
-			count: 1
-			path: src/HttpClient/HttpClientFactory.php
-
-		-
 			message: "#^Constructor of class Sentry\\\\HttpClient\\\\HttpClientFactory has an unused parameter \\$responseFactory\\.$#"
 			count: 1
 			path: src/HttpClient/HttpClientFactory.php
@@ -349,3 +344,4 @@ parameters:
 			message: "#^Method Sentry\\\\State\\\\HubInterface\\:\\:startTransaction\\(\\) invoked with 2 parameters, 1 required\\.$#"
 			count: 1
 			path: src/functions.php
+
