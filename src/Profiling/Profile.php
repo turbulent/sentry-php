@@ -164,10 +164,24 @@ final class Profile
         }
 
         $frames = [];
+        $frameIndex = 0;
+        $frameHashMap = [];
+
+        $registerFrame = static function (array $frame) use (&$frames, &$frameHashMap, &$frameIndex): int {
+            $frameHash = md5(serialize($frame));
+
+            if (false === \array_key_exists($frameHash, $frameHashMap)) {
+                $frames[] = $frame;
+                $frameHashMap[$frameHash] = $frameIndex;
+                ++$frameIndex;
+            }
+
+            return $frameHashMap[$frameHash];
+        };
+
         $samples = [];
         $stacks = [];
 
-        $frameIndex = 0;
         $duration = 0;
 
         $loggedStacks = $this->prepareStacks();
@@ -189,24 +203,21 @@ final class Profile
                     $function = $file;
                 }
 
-                $frames[] = [
+                $stacks[$stackId][] = $registerFrame([
                     'filename' => $file,
                     'abs_path' => $absolutePath,
                     'module' => $module,
                     'function' => $function,
                     'lineno' => !empty($frame['line']) ? (int) $frame['line'] : null,
-                ];
-
-                $stacks[$stackId][] = $frameIndex;
-                ++$frameIndex;
+                ]);
             }
 
             $duration = $stack['timestamp'];
 
             $samples[] = [
-                'elapsed_since_start_ns' => (int) round($duration * 1e+9),
                 'stack_id' => $stackId,
                 'thread_id' => self::THREAD_ID,
+                'elapsed_since_start_ns' => (int) round($duration * 1e+9),
             ];
         }
 
