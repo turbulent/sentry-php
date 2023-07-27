@@ -16,7 +16,15 @@ use Sentry\Util\SentryUid;
  * Type definition of the Sentry profile format.
  * All fields are none otpional.
  *
- * @see https://develop.sentry.dev/sdk/sample-format/
+ * @see https://develop.sentry.dev/sdk/profiles/
+ *
+ * @phpstan-type SentryProfileFrame array{
+ *     filename: string,
+ *     abs_path: string,
+ *     module: string|null,
+ *     function: string,
+ *     lineno: int,
+ * }
  *
  * @phpstan-type SentryProfile array{
  *    device: array{
@@ -44,11 +52,7 @@ use Sentry\Util\SentryUid;
  *    },
  *    version: string,
  *    profile: array{
- *        frames: array<int, array{
- *            function: string,
- *            filename: string,
- *            lineno: int|null,
- *        }>,
+ *        frames: array<int, SentryProfileFrame>,
  *        samples: array<int, array{
  *            elapsed_since_start_ns: int,
  *            stack_id: int,
@@ -96,6 +100,11 @@ final class Profile
      * @var int The maximum duration of a profile in seconds
      */
     private const MAX_PROFILE_DURATION = 30;
+
+    /**
+     * @var callable(SentryProfileFrame): SentryProfileFrame|null
+     */
+    private static $frameProcessor;
 
     /**
      * @var float The start time of the profile as a Unix timestamp with microseconds
@@ -189,13 +198,16 @@ final class Profile
                     $function = $file;
                 }
 
-                $frames[] = [
+                /** @var SentryProfileFrame $frame */
+                $frame = [
                     'filename' => $file,
                     'abs_path' => $absolutePath,
                     'module' => $module,
                     'function' => $function,
                     'lineno' => !empty($frame['line']) ? (int) $frame['line'] : null,
                 ];
+
+                $frames[] = null !== self::$frameProcessor ? (self::$frameProcessor)($frame) : $frame;
 
                 $stacks[$stackId][] = $frameIndex;
                 ++$frameIndex;
@@ -350,5 +362,17 @@ final class Profile
         }
 
         return true;
+    }
+
+    /**
+     * Set a callable to process each frame of the profile.
+     *
+     * @param callable(SentryProfileFrame $frame): SentryProfileFrame|null $frameProcessor
+     *
+     * @internal this method is used internally by framework SDKs to process each frame of the profile
+     */
+    public static function setFrameProcessor(?callable $frameProcessor): void
+    {
+        self::$frameProcessor = $frameProcessor;
     }
 }
