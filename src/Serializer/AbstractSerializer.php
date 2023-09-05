@@ -73,7 +73,7 @@ abstract class AbstractSerializer
      *
      * @param Options $options The SDK configuration options
      */
-    public function __construct(Options $options, int $maxDepth = 3, ?string $mbDetectOrder = null)
+    public function __construct(Options $options, int $maxDepth = 9, ?string $mbDetectOrder = null)
     {
         $this->maxDepth = $maxDepth;
 
